@@ -1,0 +1,222 @@
+<!doctype html>
+<html ng-app="pagerankApp">
+<head>
+  <meta charset="utf-8">
+  <title>PagerankVisualization</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <!-- build:css(.) styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+  <link rel="stylesheet" href="../bower_components/intro.js/introjs.css" />
+  <link rel="stylesheet" href="../bower_components/fontawesome/css/font-awesome.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css(.tmp) styles/bootstrap.min.css -->
+  <link rel="stylesheet" href="styles/bootstrap.min.css">
+  <!-- endbuild -->
+  <!-- build:css(.tmp) styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+
+
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  config: ["MMLorHTML.js"],
+  jax: ["input/TeX","input/MathML","input/AsciiMath","output/HTML-CSS","output/NativeMML"],
+  extensions: ["tex2jax.js","mml2jax.js","asciimath2jax.js","MathMenu.js","MathZoom.js"],
+  TeX: {
+    extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js", "color.js"]
+  }
+});
+
+
+
+
+  </script>
+</head>
+<body ng-controller="main">
+
+<div class="container">
+  <div class="header">
+    <!--    <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>-->
+    <h1>Effect of Linkfarms on the PageRank Algorithm</h1>
+  </div>
+
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa fa-rocket">&nbsp;</span>&nbsp;Simulator</h3>
+    </div>
+
+    <div class="panel-body">
+      <div id="cy">
+
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <div class="btn-toolbar" role="toolbar">
+
+        <!-- file menu -->
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <span class="fa fa-file-o">&nbsp;</span>&nbsp;<span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#"><span class="fa fa-upload"></span>&nbsp;Open</a></li>
+            <li><a href="#"><span class="fa fa-floppy-o"></span>&nbsp;Save</a></li>
+            <li><a href="#"><span class="fa fa-recycle"></span>&nbsp;Clear</a></li>
+            <li><a href="#"><span class="fa fa-file-pdf-o"></span>&nbsp;Export PDF</a></li>
+
+          </ul>
+        </div>
+
+
+        <!-- editor mode -->
+        <div class="btn-group" data-intro='Select editor mode'>
+          <button id="buttonselect" type="button" class="btn btn-default"><span
+            class="fa fa-arrows"></span></button>
+          <button id="buttonadd" type="button" class="btn btn-default"><span
+            class="fa fa-paint-brush"></span>&nbsp;P</button>
+          <button id="spamadd" type="button" class="btn btn-default"><span
+            class="fa fa-paint-brush"></span>&nbsp;S</button>
+          <button id="buttonedgeadd" type="button" class="btn btn-default fa fa-arrows-h"></button>
+          <button id="buttondelete" type="button" class="btn btn-danger fa fa-eraser"></button>
+        </div>
+
+        <!-- simulation control -->
+        <div class="btn-group">
+          <button type="button" ng-click="iterate()" class="btn btn-default fa fa-step-forward"></button>
+          <button type="button" ng-click="iterate10()" class="btn btn-default fa fa-step-forward">&nbsp;10</button>
+          <button type="button" ng-click="resetRanks()" class="btn btn-default fa fa-stop"></button>
+        </div>
+
+        <!-- help info -->
+        <div class="btn-group">
+          <button id="buttoninfo" type="button" class="btn btn-default"><span
+            class="fa fa-info"></span></button>
+          <button id="buttonhelp" type="button" class="btn btn-default"><span
+            class="fa fa-support"></span></button>
+        </div>
+
+        <h3 style="display:inline; margin-left: 10px; margin-top: 5px; float: right"><span class="label label-default">Iterations: {{iteration}}</span>
+        </h3>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Ranking -->
+  <div class="row">
+    <div class=" col-md-6 col-xs-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><span class="fa fa-list-ol">&nbsp;</span>&nbsp;Ranks</h3>
+        </div>
+        <div class="panel-body">
+          <!-- Table -->
+          <table class="table table-striped" style="margin:0; padding: 0">
+            <tr >
+              <th style="border-top-width: 0px">Page</th>
+              <th style="border-top-width: 0px" class="text-right">Rank</th>
+            </tr>
+            <tr ng-repeat="rank in ranks | orderBy:'rank':true">
+              <td style="color: {{rankColor(rank.col)}}">{{rank.nodeID}}</td>
+              <td class="text-right">{{rank.rank}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="panel-footer text-right"><span><strong>Sum:</strong> {{rankSum}}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Link Matrix -->
+    <div class="col-md-6 col-xs-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><span class="fa fa-th">&nbsp;</span>&nbsp;Hyperlink Matrix</h3>
+        </div>
+        <div class="panel-body">
+          <div class="math" id="linkmatrix"></div>
+          det(L) = {{detLinkMatrix}}
+        </div>
+      </div>
+    </div>
+
+    <!-- stochastic Matrix -->
+    <div class="col-md-6 col-xs-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><span class="fa fa-th">&nbsp;</span>&nbsp;Stochastic Matrix</h3>
+        </div>
+        <div class="panel-body">
+          <div class="math" id="stochasticmatrix"></div>
+          det(S) = {{detStochasticMatrix}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Matrix -->
+    <div class="col-md-12 col-xs-12">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><span class="fa cy-google">&nbsp;</span>&nbsp;Google Matrix (stochastic, irreducible,
+            aperiodic)</h3>
+        </div>
+        <div class="panel-body">
+          <div class="math" id="googlematrix"></div>
+          det(G) = {{detGoogleMatrix}}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- build:js(.) scripts/vendor.js -->
+<!-- bower:js -->
+<script src="../bower_components/jquery/dist/jquery.js"></script>
+<script src="../bower_components/cytoscape/dist/cytoscape.js"></script>
+<script src="../bower_components/intro.js/intro.js"></script>
+<script src="../bower_components/keymaster/keymaster.js"></script>
+<script src="../bower_components/chance/chance.js"></script>
+<script src="../bower_components/handlebars/handlebars.js"></script>
+<script src="../bower_components/angular/angular.js"></script>
+<script src="../bower_components/MathJax/MathJax.js"></script>
+<script src="../bower_components/mathjs/dist/math.min.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+
+
+<!-- build:js(.) scripts/plugins.js -->
+<script src="bower_components/bootstrap/js/affix.js"></script>
+<script src="bower_components/bootstrap/js/alert.js"></script>
+<script src="bower_components/bootstrap/js/dropdown.js"></script>
+<script src="bower_components/bootstrap/js/tooltip.js"></script>
+<script src="bower_components/bootstrap/js/modal.js"></script>
+<script src="bower_components/bootstrap/js/transition.js"></script>
+<script src="bower_components/bootstrap/js/button.js"></script>
+<script src="bower_components/bootstrap/js/popover.js"></script>
+<script src="bower_components/bootstrap/js/carousel.js"></script>
+<script src="bower_components/bootstrap/js/scrollspy.js"></script>
+<script src="bower_components/bootstrap/js/collapse.js"></script>
+<script src="bower_components/bootstrap/js/tab.js"></script>
+<!-- endbuild -->
+
+
+<!-- build:js({app,.tmp}) scripts/main.js -->
+<script src="scripts/Utils.js"></script>
+<script src="scripts/controller/main.js"></script>
+<!-- endbuild -->
+</body>
+</html>
