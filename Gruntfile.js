@@ -41,10 +41,6 @@ module.exports = function (grunt) {
           livereload: false
         }
       },
-      jstest: {
-        files: ['test/spec/{,*/}*.js'],
-        tasks: ['test:watch']
-      },
       gruntfile: {
         files: ['Gruntfile.js']
       },
@@ -76,20 +72,6 @@ module.exports = function (grunt) {
           middleware: function (connect) {
             return [
               connect.static('.tmp'),
-              connect().use('/bower_components', connect.static('./bower_components')),
-              connect.static(config.app)
-            ];
-          }
-        }
-      },
-      test: {
-        options: {
-          open: false,
-          port: 9001,
-          middleware: function (connect) {
-            return [
-              connect.static('.tmp'),
-              connect.static('test'),
               connect().use('/bower_components', connect.static('./bower_components')),
               connect.static(config.app)
             ];
@@ -128,19 +110,8 @@ module.exports = function (grunt) {
       all: [
         'Gruntfile.js',
         '<%= config.app %>/scripts/{,*/}*.js',
-        '!<%= config.app %>/scripts/vendor/*',
-        'test/spec/{,*/}*.js'
+        '!<%= config.app %>/scripts/vendor/*'
       ]
-    },
-
-    // Mocha testing framework configuration options
-    mocha: {
-      all: {
-        options: {
-          run: true,
-          urls: ['http://<%= connect.test.options.hostname %>:<%= connect.test.options.port %>/index.html']
-        }
-      }
     },
 
     // Add vendor prefixed styles
@@ -161,7 +132,7 @@ module.exports = function (grunt) {
     // Automatically inject Bower components into the HTML file
     wiredep: {
       app: {
-        ignorePath: /^\//,
+        ignorePath: /^\/|\.\.\//,
         src: ['<%= config.app %>/index.html'],
         exclude: ['bower_components/bootstrap/dist/js/bootstrap.js']
       }
@@ -253,28 +224,29 @@ module.exports = function (grunt) {
     // By default, your `index.html`'s <!-- Usemin block --> will take care
     // of minification. These next options are pre-configured if you do not
     // wish to use the Usemin blocks.
-    // cssmin: {
-    //   dist: {
-    //     files: {
-    //       '<%= config.dist %>/styles/main.css': [
-    //         '.tmp/styles/{,*/}*.css',
-    //         '<%= config.app %>/styles/{,*/}*.css'
-    //       ]
-    //     }
-    //   }
-    // },
-    // uglify: {
-    //   dist: {
-    //     files: {
-    //       '<%= config.dist %>/scripts/scripts.js': [
-    //         '<%= config.dist %>/scripts/scripts.js'
-    //       ]
-    //     }
-    //   }
-    // },
-    // concat: {
-    //   dist: {}
-    // },
+    cssmin: {
+       dist: {
+         files: {
+           '<%= config.dist %>/styles/main.css': [
+             '.tmp/styles/{,*/}*.css',
+             '<%= config.app %>/styles/{,*/}*.css',
+             '.tmp/styles/*.min.css'
+           ]
+         }
+       }
+    },
+    uglify: {
+       dist: {
+         files: {
+           '<%= config.dist %>/scripts/scripts.js': [
+             '<%= config.dist %>/scripts/scripts.js'
+           ]
+         }
+       }
+    },
+    concat: {
+       dist: {}
+    },
 
     // Copies remaining files to places other tasks can use
     copy: {
@@ -302,24 +274,40 @@ module.exports = function (grunt) {
         }, {
           expand: true,
           dot: true,
+          cwd: 'bower_components/MathJax/',
+          src: '**',
+          dest: '<%= config.dist %>/'
+        }, {
+          expand: true,
+          dot: true,
           cwd: 'bower_components/fontawesome/',
           src: 'fonts/*',
           dest: '<%= config.dist %>'
-        },
-          {
-            expand: true,
-            dot: true,
-            cwd: 'bower_components/katex/static',
-            src: 'fonts/*',
-            dest: '<%= config.dist %>'
-          }]
+        },{
+          expand: true,
+          dot: true,
+          cwd: 'bower_components/fontawesome/css/',
+          src: 'font-awesome.min.css',
+          dest: '.tmp/styles'
+        }]
       },
       styles: {
+        files: [
+          {
         expand: true,
         dot: true,
         cwd: '<%= config.app %>/styles',
         dest: '.tmp/styles/',
         src: '{,*/}*.css'
+          }, {
+            expand: true,
+            dot: true,
+            cwd: 'bower_components/fontawesome/css/',
+            src: 'font-awesome.min.css',
+            dest: '<%= config.app %>/.tmp/styles'
+          }
+
+        ]
       },
       glyphicons: {
         files: [
@@ -339,15 +327,18 @@ module.exports = function (grunt) {
         'copy:styles',
         'copy:glyphicons'
       ],
-      test: [
-        'copy:styles',
-        'copy:glyphicons'
-      ],
       dist: [
         'copy:styles',
+        'copy:glyphicons',
         'imagemin',
         'svgmin'
       ]
+    },
+    push: {
+      publish: {
+        branch: 'gh-pages',
+        directory: 'dist'
+      }
     }
   });
 
@@ -376,20 +367,6 @@ module.exports = function (grunt) {
     grunt.task.run([target ? ('serve:' + target) : 'serve']);
   });
 
-  grunt.registerTask('test', function (target) {
-    if (target !== 'watch') {
-      grunt.task.run([
-        'clean:server',
-        'concurrent:test',
-        'autoprefixer'
-      ]);
-    }
-
-    grunt.task.run([
-      'connect:test',
-      'mocha'
-    ]);
-  });
 
   grunt.registerTask('build', [
     'clean:dist',
@@ -408,7 +385,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'newer:jshint',
-    'test',
     'build'
   ]);
 };
