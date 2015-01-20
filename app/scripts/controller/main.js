@@ -28,6 +28,10 @@ pagerankApp.controller('main', function ($scope) {
   $scope.detGoogleMatrix = '?';
   $scope.detLinkMatrix = '?';
   $scope.detStochasticMatrix = '?';
+  $scope.matrixToUse = 2;
+  $scope.setMatrixToUse = function(matrixID) {
+    $scope.matrixToUse = matrixID;
+  }
   var alpha = 0.9;
   $scope.ranks = [];
   var ranksVector;
@@ -52,8 +56,10 @@ pagerankApp.controller('main', function ($scope) {
     resetRanks(cy);
   };
 
+
   var iterate = function () {
-    ranksVector = math.multiply(googleMatrix, ranksVector);
+    var matrix = $scope.matrixToUse === 0 ? linkMatrix : ($scope.matrixToUse === 1 ? stochasticMatrix : googleMatrix);
+    ranksVector = math.multiply(matrix, ranksVector);
     updateRanks(cy);
     $scope.iteration++;
   };

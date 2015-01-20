@@ -91,7 +91,7 @@ function constructLatexGoogleMatrix(nodes, alpha) {
   var colors = colorDefines(nodes);
   var matrix = '\\alpha = ' + alpha + '\\\\';
   var r =   ' + (1-\\alpha) \\cdot \\frac{1}{' + nodes.length + '} ';
-  matrix += '\\begin{bmatrix}';
+  matrix += 'G = \\begin{bmatrix}';
   nodes.each(function(row, rowNode) {
     nodes.each(function(column, columnNode) {
       var outdegree = columnNode.outdegree(false);
@@ -126,7 +126,7 @@ function constructLatexGoogleMatrix(nodes, alpha) {
 /*exported constructLatexStochasticMatrix */
 function constructLatexStochasticMatrix(nodes) {
   var colors = colorDefines(nodes);
-  var matrix = '\\begin{bmatrix}';
+  var matrix = 'S = \\begin{bmatrix}';
   nodes.each(function(row, rowNode) {
     nodes.each(function(column, columnNode) {
       var outdegree = columnNode.outdegree(false);
@@ -161,7 +161,7 @@ function constructLatexStochasticMatrix(nodes) {
 /*exported constructLatexLinkMatrix */
 function constructLatexLinkMatrix(nodes) {
   var colors = colorDefines(nodes);
-  var matrix = '\\begin{bmatrix}';
+  var matrix = 'H = \\begin{bmatrix}';
   nodes.each(function(row, rowNode) {
     nodes.each(function(column, columnNode) {
       var outdegree = columnNode.outdegree(false);

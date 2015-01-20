@@ -91,6 +91,14 @@ MathJax.Hub.Config({
           <button type="button" ng-click="resetRanks()" class="btn btn-default fa fa-stop"></button>
         </div>
 
+        <!-- Matrix control -->
+        <div class="btn-group">
+          <button type="button" style="border-color: black; border-width: 1px; background-color:#232628" class="btn btn-default disabled">Matrix:</button>
+          <button type="button" ng-click="setMatrixToUse(0)" ng-class="{'editor-mode-active': matrixToUse == 0}"   class="btn btn-default">H</button>
+          <button type="button" ng-click="setMatrixToUse(1)" ng-class="{'editor-mode-active': matrixToUse == 1}" class="btn btn-default">S</button>
+          <button type="button" ng-click="setMatrixToUse(2)" ng-class="{'editor-mode-active': matrixToUse == 2}" class="btn btn-default">G</button>
+        </div>
+
         <!-- help info -->
         <div class="btn-group">
           <button id="buttoninfo" type="button" class="btn btn-default"><span
@@ -128,6 +136,9 @@ MathJax.Hub.Config({
         </div>
         <div class="panel-footer text-right"><span><strong>Sum:</strong> {{rankSum}}</span></div>
       </div>
+    </div>
+    <div class="col-md-6 cold-xs-6">
+     
     </div>
   </div>
 
